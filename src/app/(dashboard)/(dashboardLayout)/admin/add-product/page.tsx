@@ -1,7 +1,7 @@
 import AddProductPage from "@/components/pages/admin/AddProductPage"
 
 export const metadata = {
-  title: "Add Product | CartX",
+  title: "Add Product | Bekolpo",
   description: "Add a new product in the admin dashboard.",
 };
 

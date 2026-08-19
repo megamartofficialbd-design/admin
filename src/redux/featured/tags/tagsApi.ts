@@ -44,6 +44,12 @@ const tagsApi = baseApi.injectEndpoints({
         body: updatedData,
       }),
     }),
+    deleteTag: builder.mutation<ITag, string>({
+      query: (id) => ({
+        url: `/tag/delete-tag/${id}`,
+        method: "DELETE",
+      }),
+    }),
   }),
 });
 
@@ -53,4 +59,5 @@ export const {
   useGetSingletagQuery,
   useUpdateTagMutation,
   useGetTagStatusQuery,
+  useDeleteTagMutation,
 } = tagsApi;

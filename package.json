@@ -1,7 +1,8 @@
 {
-  "name": "mega-mart-dashboard",
+  "name": "bekolpo-admin",
   "version": "0.1.0",
   "private": true,
+  "description": "Bekolpo - Multi-vendor E-Commerce Admin Dashboard",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -94,6 +95,7 @@
     "@types/react-dom": "^18.3.7",
     "@types/world-currencies": "^0.0.3",
     "autoprefixer": "^10.4.21",
+    "baseline-browser-mapping": "^2.11.15",
     "eslint": "^9",
     "eslint-config-next": "^16.1.6",
     "next": "^16.0.6",

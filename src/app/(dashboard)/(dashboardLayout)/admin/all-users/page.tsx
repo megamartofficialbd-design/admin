@@ -1,6 +1,6 @@
 import AllUsersPage from '@/components/pages/admin/AllUsersPage'
 export const metadata = {
-  title: "All Users | CartX",
+  title: "All Users | Bekolpo",
   description: "View all users in the admin dashboard.",
 };
 

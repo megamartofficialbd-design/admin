@@ -1,115 +1,95 @@
+'use client';
+
 import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Package, AlertCircle, TrendingUp, DollarSign } from 'lucide-react';
 
-interface StatItem {
-  title: string;
-  value: string;
-  subtitle: string;
-  icon: string;
-  color: string;
+interface InventoryStatsProps {
+  inventoryStats: any;
+  isLoading: boolean;
 }
-
-const stats: StatItem[] = [
-  {
-    title: 'Total Products',
-    value: '1,234',
-    subtitle: '+12% from last month',
-    icon: '💎',
-    color: 'text-purple-600',
-  },
-  {
-    title: 'Low Stock Items',
-    value: '24',
-    subtitle: 'Needs restocking',
-    icon: '⚠️',
-    color: 'text-yellow-600',
-  },
-  {
-    title: 'Out of Stock',
-    value: '8',
-    subtitle: '-3 from yesterday',
-    icon: '🚨',
-    color: 'text-red-600',
-  },
-  {
-    title: 'Total Value',
-    value: '$2.4M',
-    subtitle: '+6% from last month',
-    icon: '📈',
-    color: 'text-green-600',
-  },
-];
 
 const InventoryStatsCard = ({
   inventoryStats,
   isLoading,
-}: {
-  inventoryStats: any;
-  isLoading: any;
-}) => {
+}: InventoryStatsProps) => {
+  const stats = [
+    {
+      title: 'Total Products',
+      value: inventoryStats?.totalProducts?.toString() || '0',
+      subtitle: 'Active products',
+      icon: Package,
+      gradient: 'from-blue-500 to-blue-600',
+    },
+    {
+      title: 'Total Stock',
+      value: inventoryStats?.totalStock?.toString() || '0',
+      subtitle: 'Units in stock',
+      icon: TrendingUp,
+      gradient: 'from-emerald-500 to-emerald-600',
+    },
+    {
+      title: 'Low Stock Items',
+      value: inventoryStats?.lowStockItems?.toString() || '0',
+      subtitle: 'Need reorder',
+      icon: AlertCircle,
+      gradient: 'from-orange-500 to-orange-600',
+    },
+    {
+      title: 'Out of Stock',
+      value: inventoryStats?.outOfStock?.toString() || '0',
+      subtitle: 'Unavailable',
+      icon: AlertCircle,
+      gradient: 'from-red-500 to-red-600',
+    },
+  ];
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[1, 2, 3, 4].map((i) => (
+          <Card key={i} className="border-0 shadow-md">
+            <CardContent className="p-6">
+              <Skeleton className="h-8 w-3/4 mb-3" />
+              <Skeleton className="h-10 w-1/2 mb-2" />
+              <Skeleton className="h-4 w-2/3" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
   return (
-    <div>
-      {isLoading ? (
-        <div>Loading...</div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="p-4">
-            <CardContent className="p-0">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">Total Products</p>
-                  <p className="text-2xl font-bold">
-                    {inventoryStats?.totalProducts || 0}
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {stats.map((stat, index) => {
+        const Icon = stat.icon;
+        return (
+          <Card
+            key={index}
+            className="border-0 shadow-md hover:shadow-xl transition-all duration-300 hover:border-blue-300"
+          >
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <p className="text-sm text-slate-600 font-medium mb-1">
+                    {stat.title}
                   </p>
-                  <p className="text-xs text-gray-500">+12% from last month</p>
+                  <h3 className="text-3xl font-bold text-slate-900 mb-1">
+                    {stat.value}
+                  </h3>
+                  <p className="text-xs text-slate-500">{stat.subtitle}</p>
                 </div>
-                <div className={`text-2xl text-purple-600`}>💎</div>
-              </div>
-            </CardContent>
-          </Card>{' '}
-          <Card className="p-4">
-            <CardContent className="p-0">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">Low Stock Items</p>
-                  <p className="text-2xl font-bold">
-                    {inventoryStats?.lowStockItems || 0}
-                  </p>
-                  <p className="text-xs text-gray-500">Needs restocking</p>
+                <div
+                  className={`rounded-lg p-3 bg-gradient-to-br ${stat.gradient}`}
+                >
+                  <Icon className="w-6 h-6 text-white" />
                 </div>
-                <div className={`text-2xl text-yellow-600`}>⚠️</div>
-              </div>
-            </CardContent>
-          </Card>{' '}
-          <Card className="p-4">
-            <CardContent className="p-0">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">Out of Stock</p>
-                  <p className="text-2xl font-bold">
-                    {inventoryStats?.outOfStock || 0}
-                  </p>
-                  <p className="text-xs text-gray-500">-3 from yesterday</p>
-                </div>
-                <div className={`text-2xl text-red-600`}>🚨</div>
-              </div>
-            </CardContent>
-          </Card>{' '}
-          <Card className="p-4">
-            <CardContent className="p-0">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">Total Value</p>
-                  <p className="text-2xl font-bold">
-                    {inventoryStats?.totalValue|| 0}
-                  </p>
-                  <p className="text-xs text-gray-500">+6% from last month</p>
-                </div>
-                <div className={`text-2xl text-green-600`}>📈</div>
               </div>
             </CardContent>
           </Card>
-        </div>
-      )}
+        );
+      })}
     </div>
   );
 };

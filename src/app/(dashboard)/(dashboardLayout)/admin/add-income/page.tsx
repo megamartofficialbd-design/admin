@@ -1,6 +1,6 @@
 import AddNewIncome from '@/components/pages/admin/AddNewIncome';
 export const metadata = {
-  title: "Add New Income | CartX",
+  title: "Add New Income | Bekolpo",
   description: "Add a new income record in the admin dashboard.",
 };
 

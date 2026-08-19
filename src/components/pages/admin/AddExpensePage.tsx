@@ -16,7 +16,7 @@ const AddExpensePage = () => {
   return (
     <>
       <Head>
-        <title>Add New Expense | CartX</title>
+        <title>Add New Expense | Bekolpo</title>
         <meta name="description" content="Record a new business expense easily using Add Expense page." />
         <meta name="keywords" content="Expense, Business Expense, Add Expense, Finance, Accounting" />
         <meta name="author" content="Your Name or Company" />

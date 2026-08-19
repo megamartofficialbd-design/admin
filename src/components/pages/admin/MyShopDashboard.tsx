@@ -370,7 +370,7 @@ export default function MyShopDashboard() {
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem>
                               <Link
-                                href={`https://mega-mart.store/shops/shop/${shop._id}`}
+                                href={`https://bekolpo.com/shops/shop/${shop._id}`}
                               >
                                 View Details
                               </Link>

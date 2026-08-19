@@ -12,9 +12,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useForm, FormProvider } from "react-hook-form";
 import { ImagePlusIcon, XIcon } from "lucide-react";
 import { FileWithPreview, useFileUpload } from "@/hooks/use-file-upload";
 import { useEffect, useState } from "react";
@@ -27,24 +24,12 @@ import {
 
 // ---------- Types ----------
 export interface BannerFormValues {
-  title: string;
-  subTitle: string;
   image: string;
-  discount: number;
-  isActive: boolean;
-  buttonText: string;
-  buttonLink: string;
 }
 
 export interface Banner {
   _id: string;
-  title?: string;
-  subTitle?: string;
   image?: string;
-  discount?: number;
-  isActive?: boolean;
-  buttonText?: string;
-  buttonLink?: string;
 }
 
 export interface BannerCreateUpdateProps {
@@ -66,37 +51,13 @@ export default function BannerCreateUpdate({
   const [bannerImg, setBannerImg] = useState<FileWithPreview | null>(null);
   const [open, setOpen] = useState(false);
 
-  const methods = useForm<BannerFormValues>({
-    defaultValues: {
-      title: "",
-      subTitle: "",
-      image: "",
-      discount: 0,
-      isActive: false,
-      buttonText: "",
-      buttonLink: "",
-    },
-  });
-
-  const { handleSubmit, register, setValue, watch, reset } = methods;
-
-  // Prefill form if editing
-  useEffect(() => {
-    if (editBanner) {
-      reset({
-        title: editBanner.title || "",
-        subTitle: editBanner.subTitle || "",
-        image: editBanner.image || "",
-        discount: editBanner.discount || 0,
-        isActive: editBanner.isActive || false,
-        buttonText: editBanner.buttonText || "",
-        buttonLink: editBanner.buttonLink || "",
-      });
-    }
-  }, [editBanner, reset]);
-
   // ---------- Submit Handler ----------
-  const onSubmit = async (data: BannerFormValues) => {
+  const onSubmit = async () => {
+    if (!bannerImg?.file && !editBanner?.image) {
+      toast.error("Please select an image!");
+      return;
+    }
+
     const submitToast = toast.loading(
       type === "edit" ? "Updating Banner..." : "Creating Banner..."
     );
@@ -104,38 +65,30 @@ export default function BannerCreateUpdate({
     try {
       const formData = new FormData();
 
-      const payload = {
-        title: data.title || "",
-        subTitle: data.subTitle || "",
-        image: data.image || "",
-        discount: Number(data.discount) || 0,
-        isActive: data.isActive || false,
-        buttonText: data.buttonText || "",
-        buttonLink: data.buttonLink || "",
-      };
-
-      formData.append("data", JSON.stringify(payload));
-
       if (bannerImg?.file) {
         formData.append("image", bannerImg.file as File);
       }
 
+      console.log("Submitting banner with formData:", formData);
+
       if (type === "edit" && editBanner?._id) {
-        await updateBanner({
+        const response = await updateBanner({
           id: editBanner._id,
           body: formData,
         }).unwrap();
+        console.log("Update response:", response);
         toast.success("Banner updated successfully!", { id: submitToast });
       } else {
-        await createBanner(formData).unwrap();
+        const response = await createBanner(formData).unwrap();
+        console.log("Create response:", response);
         toast.success("Banner created successfully!", { id: submitToast });
       }
 
       setOpen(false);
-      reset();
       refetch?.();
       setBannerImg(null);
     } catch (error: any) {
+      console.error("Banner submission error:", error);
       const errorMessage =
         error?.data?.errorSources?.[0]?.message ||
         error?.data?.message ||
@@ -149,8 +102,11 @@ export default function BannerCreateUpdate({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        {/* ✅ Children can now be any React element */}
-        {children}
+        {typeof children === "string" ? (
+          <Button>{children}</Button>
+        ) : (
+          children
+        )}
       </DialogTrigger>
 
       <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-lg [&>button:last-child]:top-3.5">
@@ -160,102 +116,12 @@ export default function BannerCreateUpdate({
           </DialogTitle>
         </DialogHeader>
         <DialogDescription className="sr-only">
-          Add or update banner details here.
+          Add or update banner image here.
         </DialogDescription>
 
         <div className="overflow-y-auto">
           <div className="px-6 pt-4 pb-6">
-            <div className="max-h-[300px]">
-              <BannerImage setBannerImg={setBannerImg} editBanner={editBanner} />
-
-              <FormProvider {...methods}>
-                <form
-                  id="banner-form"
-                  onSubmit={handleSubmit(onSubmit)}
-                  className="space-y-4"
-                >
-                  <div className="flex flex-col gap-4 sm:flex-row">
-                    <div className="flex-1 space-y-2">
-                      <Label>Banner Title</Label>
-                      <Input
-                        placeholder="Banner Title"
-                        {...register("title", { required: true })}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-4 sm:flex-row">
-                    <div className="flex-1 space-y-2">
-                      <Label>Sub Title</Label>
-                      <Input
-                        placeholder="Banner Sub Title"
-                        {...register("subTitle", { required: true })}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-4 sm:flex-row">
-                    <div className="flex-1 space-y-2">
-                      <Label>Discount %</Label>
-                      <Input
-                        type="number"
-                        placeholder="Banner discount"
-                        {...register("discount")}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-2 mb-3">
-                    <Label className="text-sm font-medium text-gray-700">
-                      Status
-                    </Label>
-
-                    <div
-                      onClick={() => setValue("isActive", !watch("isActive"))}
-                      className={`relative flex items-center w-28 h-9 cursor-pointer rounded-full p-1 transition-all duration-300 shadow-sm ${watch("isActive")
-                        ? "bg-gradient-to-r from-green-500 to-emerald-500"
-                        : "bg-gray-300"
-                        }`}
-                    >
-                      <div
-                        className={`absolute top-1 left-1 h-7 w-7 rounded-full bg-white shadow-md transform transition-transform duration-300 ${watch("isActive")
-                          ? "translate-x-[68px]"
-                          : "translate-x-0"
-                          }`}
-                      ></div>
-
-                      <div className="flex justify-between w-full px-3 text-xs font-semibold text-white select-none">
-                        <span
-                          className={`${watch("isActive") ? "opacity-100" : "opacity-50"
-                            }`}
-                        >
-                          Active
-                        </span>
-                        <span
-                          className={`${!watch("isActive") ? "opacity-100" : "opacity-50"
-                            }`}
-                        >
-                          Inactive
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Button Text</Label>
-                    <Input
-                      placeholder="Button Text"
-                      {...register("buttonText", { required: true })}
-                    />
-                    <Label>Button Link</Label>
-                    <Input
-                      placeholder="/link-here"
-                      {...register("buttonLink", { required: true })}
-                    />
-                  </div>
-                </form>
-              </FormProvider>
-            </div>
+            <BannerImage setBannerImg={setBannerImg} editBanner={editBanner} />
           </div>
         </div>
 
@@ -265,7 +131,7 @@ export default function BannerCreateUpdate({
               Cancel
             </Button>
           </DialogClose>
-          <Button form="banner-form" type="submit" disabled={isLoading || editLoading}>
+          <Button type="submit" disabled={isLoading || editLoading} onClick={onSubmit}>
             {isLoading || editLoading ? "Saving..." : "Save changes"}
           </Button>
         </DialogFooter>
@@ -300,18 +166,20 @@ function BannerImage({
 
   return (
     <div className="h-32">
-      <div className="bg-muted relative flex size-full items-center justify-center overflow-hidden">
-        <Image
-          className="size-full object-cover"
-          src={
-            currentImage ||
-            editBanner?.image ||
-            "https://via.placeholder.com/512x96?text=No+Banner"
-          }
-          alt="Banner Image"
-          width={512}
-          height={96}
-        />
+      <div className="bg-muted relative flex size-full items-center justify-center overflow-hidden bg-gray-200">
+        {currentImage || editBanner?.image ? (
+          <Image
+            className="size-full object-cover"
+            src={currentImage || editBanner?.image || ""}
+            alt="Banner Image"
+            width={512}
+            height={96}
+          />
+        ) : (
+          <div className="flex items-center justify-center w-full h-full text-gray-500 text-sm">
+            No Banner Image
+          </div>
+        )}
 
         <div className="absolute inset-0 flex items-center justify-center gap-2">
           <button
@@ -327,7 +195,7 @@ function BannerImage({
             <button
               type="button"
               className="focus-visible:border-ring focus-visible:ring-ring/50 z-50 flex size-10 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white transition-[color,box-shadow] outline-none hover:bg-black/80 focus-visible:ring-[3px]"
-              onClick={() => removeFile(files[0]?.id)}
+              onClick={() => files[0] && removeFile(files[0].id)}
               aria-label="Remove image"
             >
               <XIcon size={16} aria-hidden="true" />

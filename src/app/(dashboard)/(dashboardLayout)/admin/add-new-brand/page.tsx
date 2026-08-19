@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 
 const Page = () => {
   useEffect(() => {
-    document.title = "Create New Brand | CartX";
+    document.title = "Create New Brand | Bekolpo";
   }, []);
 
   return <CreateBrand />;

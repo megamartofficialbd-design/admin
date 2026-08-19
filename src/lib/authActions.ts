@@ -60,8 +60,8 @@ export function useAuthHandlers() {
             }
             dispatch(logoutUser());
             toast.error("Customers are not allowed to log in here");
+            await signOut({ redirect: false });
             router.push(`${process.env.NEXT_PUBLIC_CUSTOMER_URL}`)
-            await signOut({ callbackUrl: "/auth/login" });
           };
 
           handleLogout()

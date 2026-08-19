@@ -16,6 +16,16 @@ import {
 } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 
+// Create a noop storage for server-side rendering
+const noopStorage = {
+  getItem: () => Promise.resolve(null),
+  setItem: () => Promise.resolve(),
+  removeItem: () => Promise.resolve(),
+};
+
+// Check if we're on the client side
+const persistStorage = typeof window !== 'undefined' ? storage : noopStorage;
+
 const rootReducer = combineReducers({
   [baseApi.reducerPath]: baseApi.reducer,
   auth: authReducer,
@@ -28,7 +38,7 @@ const rootReducer = combineReducers({
 });
 const persistConfig = {
   key: "root",
-  storage,
+  storage: persistStorage,
   whitelist: ["auth"],
 };
 const persistedReducers = persistReducer(persistConfig, rootReducer);

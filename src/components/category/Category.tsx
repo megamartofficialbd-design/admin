@@ -37,15 +37,14 @@ export type Option = {
 type CategoryFormValues = {
   name: string;
   details: string;
-  subCategories: Option[];
-  iconName?: string;
-  iconUrl?: string;
+  parentCategory?: string; // For assigning this category as a sub-category to another
 };
 
 type SubCategory = {
   _id: string;
   name: string;
 };
+
 export default function Category({
   children,
   type,
@@ -57,7 +56,7 @@ export default function Category({
   editCategory?: any;
   refetch: any;
 }) {
-  const [createCategory, { isLoading, isSuccess }] =
+  const [createCategory, { isLoading }] =
     useCreateCategoryMutation();
   const [updateCategory, { isLoading: EditLoading }] =
     useEditCategoryMutation();
@@ -70,9 +69,7 @@ export default function Category({
     defaultValues: {
       name: "",
       details: "",
-      subCategories: [],
-      iconName: "",
-      iconUrl: "",
+      parentCategory: undefined,
     },
   });
 
@@ -83,12 +80,7 @@ export default function Category({
       reset({
         name: editCategory.name || "",
         details: editCategory.details || "",
-        subCategories: editCategory.subCategories.map((sub: SubCategory) => ({
-          value: sub._id,
-          label: sub.name,
-        })),
-        iconName: editCategory.icon?.name || "",
-        iconUrl: editCategory.icon?.url || "",
+        parentCategory: editCategory.parentCategory || undefined,
       });
     }
   }, [editCategory, reset]);
@@ -114,11 +106,14 @@ export default function Category({
   const { data: categoriesData, isLoading: isCategoriesLoading } =
     useGetAllCategoriesQuery(undefined);
 
-  const simplifiedCategories: Option[] =
-    categoriesData?.map((cat: any) => ({
-      value: cat._id,
-      label: cat.name,
-    })) ?? [];
+  // Filter to show only parent categories (not sub-categories) for assignment
+  const parentCategoryOptions: Option[] =
+    categoriesData
+      ?.filter((cat: any) => cat.isSubCategory !== true && cat._id !== editCategory?._id)
+      ?.map((cat: any) => ({
+        value: cat._id,
+        label: cat.name,
+      })) ?? [];
 
   const onSubmit = async (data: CategoryFormValues) => {
     const submitToast = toast.loading(
@@ -127,32 +122,25 @@ export default function Category({
 
     try {
       const formData = new FormData();
-      let payload;
+      let payload: any;
 
-     if (editCategory) {
-       payload = {
-         name: data.name,
-         details: data.details,
-         icon: {
-           name: data.iconName ? data.iconName : undefined,
-           url: data.iconUrl ? data.iconUrl : undefined,
-         },
-         subCategories: data.subCategories.map((cat: any) => cat.value),
-         image: editCategory?.image || '',
-         bannerImg: editCategory?.bannerImg || '',
-         deletedImages: deletedImages || '',
-       };
-     } else {
-       payload = {
-         name: data.name,
-         details: data.details,
-         icon: {
-           name: data.iconName ? data.iconName : undefined,
-           url: data.iconUrl ? data.iconUrl : undefined,
-         },
-         subCategories: data.subCategories.map((cat: any) => cat.value),
-       };
-     }
+      if (editCategory) {
+        payload = {
+          name: data.name,
+          details: data.details,
+          parentCategory: data.parentCategory || null,
+          image: editCategory?.image || "",
+          bannerImg: editCategory?.bannerImg || "",
+          deletedImages: deletedImages || "",
+        };
+      } else {
+        payload = {
+          name: data.name,
+          details: data.details,
+          parentCategory: data.parentCategory || null,
+          isSubCategory: !!data.parentCategory,
+        };
+      }
 
       formData.append("data", JSON.stringify(payload));
 
@@ -206,7 +194,7 @@ export default function Category({
 
         <div className="overflow-y-auto">
           <div className="px-6 pt-4 pb-6 ">
-            <div className="max-h-[300px]">
+            <div className="max-h-[400px]">
               <BannerImage
                 setBannerImg={setBannerImg}
                 editCategory={editCategory}
@@ -236,34 +224,38 @@ export default function Category({
                     />
                   </div>
 
+                  {/* Assign to Parent Category */}
                   <div>
-                    <Label>Select SubCategory</Label>
+                    <Label>Assign as Sub-Category (Optional)</Label>
+                    <p className="text-xs text-gray-500 mb-2">
+                      Select a parent category if you want this to be a sub-category
+                    </p>
                     <MultipleSelector
-                      commandProps={{ label: "Select SubCategory" }}
-                      defaultOptions={simplifiedCategories}
-                      placeholder="Select SubCategory"
+                      commandProps={{ label: "Select Parent Category" }}
+                      defaultOptions={parentCategoryOptions}
+                      placeholder="Select parent category..."
                       hideClearAllButton
                       hidePlaceholderWhenSelected
                       emptyIndicator={
-                        <p className="text-center text-sm">No results found</p>
+                        <p className="text-center text-sm">No parent categories found</p>
                       }
-                      value={watch("subCategories")}
-                      onChange={(val) => setValue("subCategories", val)}
+                      value={
+                        watch("parentCategory")
+                          ? [
+                              {
+                                value: watch("parentCategory") as string,
+                                label:
+                                  parentCategoryOptions.find(
+                                    (cat) => cat.value === watch("parentCategory")
+                                  )?.label || "",
+                              },
+                            ]
+                          : []
+                      }
+                      onChange={(val) => {
+                        setValue("parentCategory", val.length > 0 ? val[0].value : undefined);
+                      }}
                     />
-                  </div>
-
-                  <div className="*:not-first:mt-2">
-                    <div className="flex-1 space-y-2">
-                      <Label>Icon Name (Optional)</Label>
-                      <Input
-                        placeholder="Icon name"
-                        {...register("iconName")}
-                      />
-                    </div>
-                    <div className="flex-1 space-y-2">
-                      <Label>Icon Url (Optional)</Label>
-                      <Input placeholder="Icon Url" {...register("iconUrl")} />
-                    </div>
                   </div>
                 </form>
               </FormProvider>
@@ -276,8 +268,8 @@ export default function Category({
               Cancel
             </Button>
           </DialogClose>
-          <Button form="add-category" type="submit">
-            {isLoading ? "Saving..." : "Save changes"}
+          <Button form="add-category" type="submit" disabled={isLoading || EditLoading}>
+            {isLoading || EditLoading ? "Saving..." : "Save changes"}
           </Button>
         </DialogFooter>
       </DialogContent>

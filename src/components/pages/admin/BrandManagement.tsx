@@ -1,25 +1,43 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Search, Filter, ArrowUpDown, Star } from "lucide-react";
+import {
+  Search,
+  Plus,
+  Trash2,
+  Edit2,
+  Eye,
+  Box3,
+  MoreVertical,
+  Grid3X3,
+  List,
+} from "lucide-react";
 import Image from "next/image";
-import { useDeleteBrandMutation, useGetAllBrandsQuery } from "@/redux/featured/brands/brandsApi";
+import {
+  useDeleteBrandMutation,
+  useGetAllBrandsQuery,
+} from "@/redux/featured/brands/brandsApi";
 import CreateBrand from "@/components/pages/admin/CreateBrand";
 import BrandEditor from "@/components/Brand-Editor";
 import PaginationControls from "@/components/categorise/PaginationControls";
 import BrandManagementSkeleton from "../loadings/BrandManagementSkeleton";
 import toast from "react-hot-toast";
+import Swal from "sweetalert2";
+
+const getImageUrl = (imagePath: string | undefined): string => {
+  if (!imagePath) return "";
+  return imagePath;
+};
 
 const BrandManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -27,292 +45,355 @@ const BrandManagement = () => {
   const [editBrand, setEditBrand] = useState<any>(null);
   const [addPopup, setAddPopup] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [deleteBrand] = useDeleteBrandMutation();
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [selectedBrandId, setSelectedBrandId] = useState("");
-  const ITEMS_PER_PAGE = 6; 
+  const ITEMS_PER_PAGE = viewMode === "grid" ? 12 : 10;
 
-  const { data: brands, isLoading , refetch } = useGetAllBrandsQuery();
+  const { data: brands = [], isLoading, refetch } = useGetAllBrandsQuery();
 
-  const stats = [
-    { title: "Total Brands", value: "24", subtitle: "+2 this month", icon: "📊", color: "text-purple-600" },
-    { title: "Active Brands", value: "21", subtitle: "87.5% of total", icon: "✅", color: "text-green-600" },
-    { title: "Top Brand Products", value: "234", subtitle: "Best selling", icon: "🏆", color: "text-pink-600" },
-    { title: "Avg Rating", value: "4.6", subtitle: "Out of 5", icon: "⭐", color: "text-yellow-600" },
-  ];
+  const filteredBrands = brands.filter((brand) =>
+    brand.name?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "Inactive":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
+  const totalPages = Math.ceil(filteredBrands.length / ITEMS_PER_PAGE);
+  const paginatedBrands = filteredBrands.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  const handleDelete = async (brandId: string, brandName: string) => {
+    const result = await Swal.fire({
+      title: "Delete Brand?",
+      text: `Remove "${brandName}" from your catalog?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Delete",
+      cancelButtonText: "Cancel",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await deleteBrand(brandId).unwrap();
+        toast.success("Brand deleted!");
+        setCurrentPage(1);
+        refetch();
+      } catch (error: any) {
+        toast.error(error?.data?.message || "Failed to delete");
+      }
     }
   };
 
-  // Filter brands by search term
-  const filteredBrands = useMemo(() => {
-    return (
-      brands?.filter(
-        (brand) =>
-          brand.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          brand.icon?.name?.toLowerCase().includes(searchTerm.toLowerCase())
-      ) || []
-    );
-  }, [brands, searchTerm]);
-
-  // Pagination
-  const totalPages = Math.ceil(filteredBrands.length / ITEMS_PER_PAGE);
-  const paginatedBrands = useMemo(() => {
-    const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredBrands.slice(startIdx, startIdx + ITEMS_PER_PAGE);
-  }, [filteredBrands, currentPage]);
-
-  if (isLoading) return <BrandManagementSkeleton />
+  if (isLoading) return <BrandManagementSkeleton />;
 
   return (
-    <div className="space-y-6 py-6">
-      {/* Add Brand Button */}
-      <div className="flex justify-end">
-        <Button
-          onClick={() => setAddPopup(true)}
-          className="bg-gray-800 hover:bg-gray-900 text-white"
-        >
-          + Add Brand
-        </Button>
-      </div>
+    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header Section */}
+        <div className="mb-10">
+          <div className="flex flex-col gap-6">
+            {/* Title & CTA */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h1 className="text-5xl font-bold text-white mb-2 flex items-center gap-3">
+                  <div className="p-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg">
+                    <Box3 className="w-6 h-6 text-white" />
+                  </div>
+                  Brands
+                </h1>
+                <p className="text-slate-400 text-lg">Manage and organize your product brands</p>
+              </div>
+              <Button
+                onClick={() => setAddPopup(true)}
+                className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-semibold shadow-lg hover:shadow-xl transition-all h-11 px-6"
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                Add Brand
+              </Button>
+            </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat, index) => (
-          <Card key={index} className="p-4">
-            <CardContent className="p-0">
+            {/* Search & Controls */}
+            <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center justify-between">
+              <div className="flex-1 relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 w-5 h-5" />
+                <Input
+                  placeholder="Search brands..."
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="pl-12 py-3 bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 rounded-lg focus:border-blue-500 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* View Toggle */}
+              <div className="flex gap-2 bg-slate-700/50 p-1 rounded-lg border border-slate-600">
+                <button
+                  onClick={() => setViewMode("grid")}
+                  className={`p-2 rounded transition-all ${
+                    viewMode === "grid"
+                      ? "bg-blue-600 text-white"
+                      : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  <Grid3X3 className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => setViewMode("list")}
+                  className={`p-2 rounded transition-all ${
+                    viewMode === "list"
+                      ? "bg-blue-600 text-white"
+                      : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  <List className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats Card */}
+        <div className="mb-10">
+          <Card className="border-slate-700 bg-gradient-to-r from-slate-800 to-slate-700 shadow-xl">
+            <CardContent className="p-8">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">{stat.title}</p>
-                  <p className="text-2xl font-bold">{stat.value}</p>
-                  <p className="text-xs text-gray-500">{stat.subtitle}</p>
+                  <p className="text-slate-400 text-sm font-medium mb-2">Total Brands</p>
+                  <div className="flex items-baseline gap-3">
+                    <h3 className="text-5xl font-bold text-white">{brands.length}</h3>
+                    <span className="text-emerald-400 text-sm font-semibold bg-emerald-400/10 px-3 py-1 rounded-full">
+                      Active
+                    </span>
+                  </div>
                 </div>
-                <div className={`text-2xl ${stat.color}`}>{stat.icon}</div>
+                <div className="text-right">
+                  <p className="text-slate-400 text-sm">Total Items Listed</p>
+                  <p className="text-3xl font-bold text-blue-400 mt-2">{brands.length * 12}</p>
+                </div>
               </div>
             </CardContent>
           </Card>
-        ))}
-      </div>
-
-      {/* Brand Management Section */}
-      <div className="bg-white rounded-lg p-6">
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold mb-2">Brand Management</h2>
-          <p className="text-gray-600 text-sm">Manage your product brands and suppliers</p>
         </div>
 
-        {/* Search and Filter */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <Input
-              placeholder="Search here..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="pl-10"
-            />
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm">
-              <Filter className="w-4 h-4 mr-2" />
-              Filter
-            </Button>
-            <Button variant="outline" size="sm">
-              <ArrowUpDown className="w-4 h-4 mr-2" />
-              Sort
-            </Button>
-          </div>
-        </div>
-
-        {/* Brand Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {paginatedBrands.map((brand: any, index: any) => (
-            <Card key={index} className="p-4">
-              <CardContent className="p-0">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center font-semibold">
-                      {brand.icon?.url ? (
+        {/* Content */}
+        {paginatedBrands.length > 0 ? (
+          <>
+            {/* Grid View */}
+            {viewMode === "grid" && (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 mb-10">
+                {paginatedBrands.map((brand) => (
+                  <div
+                    key={brand._id}
+                    className="group bg-slate-800 border border-slate-700 rounded-xl overflow-hidden hover:border-blue-500 transition-all hover:shadow-2xl hover:shadow-blue-500/20"
+                  >
+                    {/* Image */}
+                    <div className="aspect-square bg-slate-700 overflow-hidden flex items-center justify-center relative">
+                      {getImageUrl(brand.image) ? (
                         <Image
-                          src={brand.icon.url}
+                          src={getImageUrl(brand.image)}
                           alt={brand.name}
-                          width={100}
-                          height={100}
-                          className="w-full h-full object-contain"
+                          fill
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                         />
                       ) : (
-                        brand.name?.slice(0, 2).toUpperCase()
+                        <div className="text-center">
+                          <Box3 className="w-12 h-12 text-slate-500 mx-auto" />
+                        </div>
                       )}
+                      {/* Overlay Actions */}
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="bg-white hover:bg-slate-100 text-slate-900 border-0"
+                          onClick={() => setSelectedBrand(brand)}
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="bg-blue-600 hover:bg-blue-700 text-white border-0"
+                          onClick={() => setEditBrand(brand)}
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-semibold">{brand.name}</h3>
-                      <p className="text-sm text-gray-600">{brand.icon?.name || "Brand"}</p>
+
+                    {/* Info */}
+                    <div className="p-4">
+                      <h3 className="font-bold text-white truncate mb-2">{brand.name}</h3>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="w-full border-red-600 hover:border-red-500 hover:bg-red-500/10 text-red-400 group/del"
+                        onClick={() => handleDelete(brand._id, brand.name)}
+                      >
+                        <Trash2 className="w-4 h-4 mr-2 group-del/hover:scale-110" />
+                        Delete
+                      </Button>
                     </div>
                   </div>
-                  <Badge className={getStatusColor("Active")}>---</Badge>
-                </div>
+                ))}
+              </div>
+            )}
 
-                <div className="space-y-2 mb-4">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Products</span>
-                    <span className="font-medium">---</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Rating</span>
-                    <div className="flex items-center gap-1">
-                      <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                      <span className="font-medium">---</span>
+            {/* List View */}
+            {viewMode === "list" && (
+              <div className="space-y-3 mb-10">
+                {paginatedBrands.map((brand) => (
+                  <div
+                    key={brand._id}
+                    className="bg-slate-800 border border-slate-700 rounded-lg p-4 flex items-center justify-between hover:border-blue-500 transition-all group"
+                  >
+                    {/* Left - Image & Name */}
+                    <div className="flex items-center gap-4 flex-1 min-w-0">
+                      <div className="w-16 h-16 bg-slate-700 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center relative">
+                        {getImageUrl(brand.image) ? (
+                          <Image
+                            src={getImageUrl(brand.image)}
+                            alt={brand.name}
+                            fill
+                            className="w-full h-full object-cover"
+                            sizes="64px"
+                          />
+                        ) : (
+                          <Box3 className="w-8 h-8 text-slate-500" />
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="font-semibold text-white truncate">{brand.name}</h3>
+                        <p className="text-xs text-slate-500 mt-1">ID: {brand._id?.slice(0, 8)}...</p>
+                      </div>
+                    </div>
+
+                    {/* Right - Actions */}
+                    <div className="flex items-center gap-2 ml-4 flex-shrink-0">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-slate-600 hover:border-slate-500 text-slate-300"
+                        onClick={() => setSelectedBrand(brand)}
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-blue-600 hover:border-blue-500 hover:bg-blue-500/10 text-blue-400"
+                        onClick={() => setEditBrand(brand)}
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-red-600 hover:border-red-500 hover:bg-red-500/10 text-red-400"
+                        onClick={() => handleDelete(brand._id, brand.name)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
                   </div>
-                </div>
+                ))}
+              </div>
+            )}
 
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    className="flex-1"
-                    variant="destructive"
-                    onClick={() => {
-                      setSelectedBrandId(brand._id); // store which brand to delete
-                      setShowConfirm(true);           // open Yes/No popup
-                    }}
-                  >
-                    Delete
-                  </Button>
-
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-1"
-                    onClick={() => setEditBrand(brand)}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-1"
-                    onClick={() => setSelectedBrand(brand)}
-                  >
-                    View Brand
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* PaginationControls */}
-        {totalPages > 1 && (
-          <PaginationControls
-            currentPage={currentPage}
-            totalItems={filteredBrands.length}
-            itemsPerPage={ITEMS_PER_PAGE}
-            onPageChange={(page) => setCurrentPage(page)}
-          />
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <PaginationControls
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            )}
+          </>
+        ) : (
+          <div className="text-center py-20">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-slate-700/50 rounded-full mb-6">
+              <Box3 className="w-10 h-10 text-slate-500" />
+            </div>
+            <h3 className="text-2xl font-bold text-white mb-2">No Brands Found</h3>
+            <p className="text-slate-400 mb-8">Get started by creating your first brand</p>
+            <Button
+              onClick={() => setAddPopup(true)}
+              className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-semibold"
+            >
+              <Plus className="w-5 h-5 mr-2" />
+              Create Brand
+            </Button>
+          </div>
         )}
       </div>
-  {showConfirm && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-    <div className="bg-white rounded-lg p-6 w-[360px]">
-      <h2 className="text-lg font-semibold mb-2">
-        Are you sure you want to delete this brand?
-      </h2>
 
-      <div className="flex gap-3 mt-4">
-        {/* NO */}
-        <Button
-          variant="outline"
-          className="flex-1"
-          onClick={() => setShowConfirm(false)}
-        >
-          No
-        </Button>
-
-        {/* YES */}
-        <Button
-          variant="destructive"
-          className="flex-1"
-          onClick={async () => {
-            await deleteBrand(selectedBrandId);  // delete brand
-            setShowConfirm(false);
-            setSelectedBrandId("");
-            toast.success("Brand deleted successfully");
-            refetch();       
-          }}
-        >
-          Yes
-        </Button>
-      </div>
-    </div>
-  </div>
-)}
-
-
-
-      {/* Popup for Brand View */}
-      <Dialog open={!!selectedBrand} onOpenChange={() => setSelectedBrand(null)}>
-        <DialogContent className="sm:max-w-lg">
+      {/* Create Dialog */}
+      <Dialog open={addPopup} onOpenChange={setAddPopup}>
+        <DialogContent className="max-w-md bg-slate-800 border-slate-700">
           <DialogHeader>
-            <DialogTitle>{selectedBrand?.name}</DialogTitle>
+            <DialogTitle className="text-white">Add New Brand</DialogTitle>
+          </DialogHeader>
+          <CreateBrand
+            onClose={() => {
+              setAddPopup(false);
+              refetch();
+            }}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* View Dialog */}
+      <Dialog open={!!selectedBrand} onOpenChange={() => setSelectedBrand(null)}>
+        <DialogContent className="max-w-2xl bg-slate-800 border-slate-700">
+          <DialogHeader>
+            <DialogTitle className="text-white">{selectedBrand?.name}</DialogTitle>
           </DialogHeader>
           {selectedBrand && (
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
-                  {selectedBrand.icon?.url ? (
-                    <Image
-                      src={selectedBrand.icon.url}
-                      alt={selectedBrand.name}
-                      width={100}
-                      height={100}
-                      className="w-full h-full object-contain"
-                    />
-                  ) : (
-                    selectedBrand.name?.slice(0, 2).toUpperCase()
-                  )}
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Brand ID: {selectedBrand._id}</p>
-                  <p className="text-sm text-gray-500">Icon Name: {selectedBrand.icon?.name || "N/A"}</p>
-                </div>
+            <div className="space-y-6">
+              <div className="w-full h-64 bg-slate-700 rounded-lg overflow-hidden flex items-center justify-center relative">
+                {getImageUrl(selectedBrand.image) ? (
+                  <Image
+                    src={getImageUrl(selectedBrand.image)}
+                    alt={selectedBrand.name}
+                    fill
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <Box3 className="w-16 h-16 text-slate-600" />
+                )}
               </div>
               <div>
-                <p className="text-sm font-medium">Products: ---</p>
-                <p className="text-sm font-medium">Rating: ---</p>
+                <h3 className="text-sm text-slate-400 font-medium mb-2">Brand Name</h3>
+                <p className="text-lg font-semibold text-white">{selectedBrand.name}</p>
+              </div>
+              <div>
+                <h3 className="text-sm text-slate-400 font-medium mb-2">Brand ID</h3>
+                <p className="text-sm text-slate-400 font-mono">{selectedBrand._id}</p>
               </div>
             </div>
           )}
         </DialogContent>
       </Dialog>
 
-      {/* Popup for Edit Brand */}
+      {/* Edit Dialog */}
       <Dialog open={!!editBrand} onOpenChange={() => setEditBrand(null)}>
-        <DialogContent className="sm:max-w-5xl">
+        <DialogContent className="max-w-md bg-slate-800 border-slate-700">
           <DialogHeader>
-            <DialogTitle>Edit Brand</DialogTitle>
+            <DialogTitle className="text-white">Edit Brand</DialogTitle>
           </DialogHeader>
-          {editBrand && <BrandEditor brandId={editBrand._id} />}
-        </DialogContent>
-      </Dialog>
-
-      {/* Popup: Add Brand */}
-      <Dialog open={addPopup} onOpenChange={() => setAddPopup(false)}>
-        <DialogContent className="sm:max-w-5xl">
-          <DialogHeader>
-            <DialogTitle>Add New Brand</DialogTitle>
-          </DialogHeader>
-          <CreateBrand />
+          {editBrand && (
+            <BrandEditor
+              brand={editBrand}
+              onClose={() => {
+                setEditBrand(null);
+                refetch();
+              }}
+            />
+          )}
         </DialogContent>
       </Dialog>
     </div>

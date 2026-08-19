@@ -1,7 +1,7 @@
 import AddFaqPage from '@/components/pages/admin/AddFaqPage';
 
 export const metadata = {
-  title: "Add FAQ |  CartX",
+  title: "Add FAQ |  Bekolpo",
   description: "Add a new FAQ entry in the admin dashboard.",
 };
 

@@ -1,6 +1,6 @@
 import ApprovedDeposits from "@/components/approved-deposits/approved-deposits";
 export const metadata = {
-  title: "Approved Deposits | CartX",
+  title: "Approved Deposits | Bekolpo",
   description: "View all approved deposits in the admin dashboard.",
 };
 

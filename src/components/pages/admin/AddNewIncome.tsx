@@ -14,7 +14,7 @@ const AddNewIncome = () => {
   return (
     <>
     <Head>
-        <title>Add New Income | CartX</title>
+        <title>Add New Income | Bekolpo</title>
         <meta
           name="description"
           content="Record a new income entry easily using Add Income page."

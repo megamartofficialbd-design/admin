@@ -43,10 +43,11 @@ export function TopNavbar({ isSidebarOpen, toggleSidebar }: TopNavbarProps) {
       } catch (err) {}
     }
     dispatch(logoutUser());
-    await signOut({ callbackUrl: "/auth/login" });
+    await signOut({ redirect: false });
+    router.push("/auth/login");
   };
   return (
-    <div className="flex items-center w-full justify-between gap-4 px-4 py-3 md:px-6 lg:px-8 xl:px-10 2xl:px-12 bg-white sticky top-0 z-30 border-b border-gray-200 ">
+    <div className="flex items-center w-full justify-between gap-4 px-4 md:px-6 lg:px-8 xl:px-10 2xl:px-12 bg-white sticky top-0 z-30 border-b border-gray-200 h-16">
       {/* Left side */}
       <div className="flex items-center gap-3">
         {/* Mobile Menu Button */}
@@ -117,7 +118,7 @@ export function TopNavbar({ isSidebarOpen, toggleSidebar }: TopNavbarProps) {
               <span className="ml-2">Create Shop</span>
             </Button>
           </Link>
-          <Link href={`https://mega-mart.store`}>
+          <Link href={`https://bekolpo.com`}>
             <Button
               variant="outline"
               size="sm"
@@ -234,7 +235,7 @@ export function TopNavbar({ isSidebarOpen, toggleSidebar }: TopNavbarProps) {
                     <span className="ml-2">Create Shop</span>
                   </Button>
                 </Link>
-                <Link href={`https://mega-mart.store`}>
+                <Link href={`https://bekolpo.com`}>
                   <Button
                     variant="outline"
                     size="sm"

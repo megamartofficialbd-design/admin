@@ -50,6 +50,12 @@ export const attributeApi = baseApi.injectEndpoints({
       }),
       transformResponse: (response: { data: IAttribute }) => response.data,
     }),
+    deleteAttribute: builder.mutation<IAttribute, string>({
+      query: (id) => ({
+        url: `/attribute/delete-attribute/${id}`,
+        method: 'DELETE',
+      }),
+    }),
   }),
   overrideExisting: false,
 });
@@ -59,5 +65,6 @@ export const {
   useGetAttributeByIdQuery,
   useCreateAttributeMutation,
   useUpdateAttributeMutation,
-  useGetAttributeStatusQuery
+  useGetAttributeStatusQuery,
+  useDeleteAttributeMutation,
 } = attributeApi;

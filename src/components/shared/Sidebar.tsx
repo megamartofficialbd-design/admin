@@ -174,6 +174,9 @@ export function AppSidebar({
           href: "/admin/coupons/add-new-coupons",
         },
       ],
+      categoryItems: [
+        { icon: Hash, label: "All Categories", href: "/admin/category-management" },
+      ],
       settingsItems: [
         {
           icon: Settings,
@@ -426,18 +429,20 @@ const { data: settings } = useGetSettingsQuery();
       {/* Logo */}
       <div
         className={cn(
-          "flex items-center gap-3 p-4 bg-white h-16 transition-all duration-300",
-          isCollapsed ? "justify-center px-2" : "px-5",
-          "shrink-0",
+          "flex items-center justify-center gap-3 p-3 bg-white h-16 transition-all duration-300",
+          isCollapsed ? "justify-center px-2" : "px-4",
+          "shrink-0 border-b border-gray-200",
         )}
       >
         <Image
-           src={site?.siteLogo ? site?.siteLogo : "/logo.png"} alt="logo"
+          src="/logo.png"
+          alt="logo"
           width={100}
           height={100}
+          priority
+          unoptimized
           className="flex-shrink-0 rounded transition-transform duration-300 hover:scale-110"
         />
-     
       </div>
 
       {/* Mobile Close */}
@@ -511,15 +516,21 @@ const { data: settings } = useGetSettingsQuery();
                   BarChart3,
                   "Inventory",
                 )}
-                {/* <div className="ml-2">{renderCollapsible(CreditCard, 'Wallet', navigationItems.walletItems, 'walletItems')}</div> */}
               </div>
             </div>
 
-            <div>
-              {renderSection(
-                "E-COMMERCE MANAGEMENT",
-                navigationItems.ecommerceManagement,
+            <div key="ecommerce-section" className="space-y-2">
+              {!isCollapsed && (
+                <h3 className="px-4 py-2 text-left uppercase text-xs font-semibold text-gray-400 tracking-wider transition-opacity duration-200">
+                  E-COMMERCE MANAGEMENT
+                </h3>
               )}
+              <div className="ml-1">
+                {renderLink("/admin/banners", UsbIcon, "Hero Banners")}
+                {renderLink("/admin/taxes", Calculator, "Taxes")}
+                {renderLink("/admin/shippings", Truck, "Shippings")}
+                {renderLink("/admin/withdrawals", CreditCard, "Withdrawals")}
+              </div>
             </div>
 
             <div key="wallet-section" className="space-y-2">

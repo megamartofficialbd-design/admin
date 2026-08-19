@@ -55,12 +55,7 @@ export default function ViewCategoryDetails({
                 {/* Banner */}
                 <div className="relative w-full h-36 bg-gray-200">
                   <Image
-                    src={
-                      category.bannerImg instanceof File
-                        ? URL.createObjectURL(category.bannerImg)
-                        : category.bannerImg ||
-                          "https://via.placeholder.com/600x200?text=No+Banner"
-                    }
+                    src={category.bannerImg || "https://via.placeholder.com/600x200?text=No+Banner"}
                     alt="Banner"
                     fill
                     className="object-cover border"
@@ -69,12 +64,7 @@ export default function ViewCategoryDetails({
                   <div className="absolute left-1/2 -bottom-12 transform -translate-x-1/2">
                     {category.image ? (
                       <Image
-                        src={
-                          category.image instanceof File
-                            ? URL.createObjectURL(category.image)
-                            : category.image ||
-                              "https://via.placeholder.com/600x200?text=No+Banner"
-                        }
+                        src={category.image || "https://via.placeholder.com/600x200?text=No+Banner"}
                         alt="Avatar"
                         width={96}
                         height={96}

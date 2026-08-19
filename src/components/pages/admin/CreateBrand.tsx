@@ -4,248 +4,207 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useCreateBrandMutation } from "@/redux/featured/brands/brandsApi";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 import Image from "next/image";
+import { Upload, X } from "lucide-react";
 
-interface IconField {
-  name: string;
-  file: File | null;
+interface CreateBrandProps {
+  onClose?: () => void;
 }
 
-interface ImageField {
-  layout: "grid" | "slider";
-  file: File | null;
-}
-
-
-
-
-
-const CreateBrand = () => {
+const CreateBrand: React.FC<CreateBrandProps> = ({ onClose }) => {
   const [name, setName] = useState("");
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [icon, setIcon] = useState<IconField>({ name: "", file: null });
-  const [image, setImage] = useState<ImageField>({
-    layout: "grid",
-    file: null,
-  });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>("");
   const [createBrand, { isLoading }] = useCreateBrandMutation();
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error("Image size must be less than 10MB");
+        return;
+      }
+
+      // Validate file type
+      if (!file.type.startsWith("image/")) {
+        toast.error("Please select a valid image file");
+        return;
+      }
+
+      setImageFile(file);
+      const preview = URL.createObjectURL(file);
+      setImagePreview(preview);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setImagePreview("");
+  };
+
   const handleSubmit = async () => {
-    if (!name) {
+    // Validate name
+    if (!name.trim()) {
       toast.error("Brand name is required!");
       return;
     }
 
+    // Validate image
+    if (!imageFile) {
+      toast.error("Brand image is required!");
+      return;
+    }
+
     try {
+      // Create FormData with name and image
       const formData = new FormData();
-      const paylod = {
-        name,
-        title,
-        description,
-        icon: {
-          name: icon.name,
-        },
-      };
-      formData.append("data", JSON.stringify(paylod as any));
+      formData.append("name", name.trim());
+      formData.append("image", imageFile);
 
-      if (icon.file) {
-        formData.append("iconImage", icon.file);
-      }
-
-      if (image.file) {
-        if (image.layout === "grid") formData.append("gridImage", image.file);
-        if (image.layout === "slider") formData.append("sliderImage", image.file);
-      }
-
-
-      await createBrand(formData as any).unwrap();
+      // Call API
+      await createBrand(formData).unwrap();
+      
       toast.success("Brand created successfully!");
 
       // Reset form
       setName("");
-      setTitle("");
-      setDescription("");
-      setIcon({ name: "", file: null });
-      setImage({ layout: "grid", file: null });
-    } catch (error) {
-      toast.error("Failed to create brand!");
+      setImageFile(null);
+      setImagePreview("");
+
+      // Close dialog
+      if (onClose) {
+        onClose();
+      }
+    } catch (error: any) {
+      console.error("Create brand error:", error);
+      const errorMessage = 
+        typeof error === "string" 
+          ? error 
+          : error?.data?.message || "Failed to create brand";
+      toast.error(errorMessage);
     }
   };
 
   return (
+    <div className="w-full">
+      <CardContent className="p-0">
+        <div className="space-y-6">
+          {/* Brand Name Field */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-900 mb-2">
+              Brand Name <span className="text-red-500">*</span>
+            </label>
+            <Input
+              placeholder="Enter brand name (e.g., Nike, Adidas)"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="h-11 rounded-lg border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              disabled={isLoading}
+            />
+          </div>
 
-    <>
+          {/* Brand Image Field */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-900 mb-3">
+              Brand Image <span className="text-red-500">*</span>
+            </label>
 
-      <div className="flex  ">
-        <div className="w-full   ">
-          <CardContent className="">
-            <div className="space-y-6">
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-
-              {/* Brand Name */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Brand Name
-                </label>
-                <Input
-                  placeholder="Enter brand name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="h-12 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                />
-
-              </div>
-              {/* Brand Title */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Brand Title
-                </label>
-                <Input
-                  placeholder="Enter brand title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="h-12 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                />
-              </div>
-
-              </div>
-
-
-              {/* Brand Description */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Brand Description
-                </label>
-                <textarea
-                  placeholder="Enter brand description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={4}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2
-               focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                />
-              </div>
-
-              <div className="flex gap-4 sm:flex-row flex-col">
-
-
-
-                <div className="bg-gray-50 w-full  p-5 rounded-xl border border-gray-200">
-                  <h3 className="text-sm font-semibold text-gray-700 mb-4">Brand Image</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-                    <div className="sm:col-span-3">
-                      <label className="block text-xs font-medium text-gray-600 mb-1">
-                        Layout
-                      </label>
-                      <Select
-                        value={image.layout}
-                        onValueChange={(value) =>
-                          setImage({ ...image, layout: value as "grid" | "slider" })
-                        }
-                      >
-                        <SelectTrigger className="h-10 px-3 bg-white w-full rounded-lg border border-gray-300 focus:ring-1 focus:ring-blue-500">
-                          <SelectValue placeholder="Select layout" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="grid">Grid</SelectItem>
-                          <SelectItem value="slider">Slider</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="sm:col-span-9 space-y-2">
-                      <label className="block text-xs font-medium text-gray-600 mb-1">
-                        Upload Image
-                      </label>
-                      <Input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) =>
-                          setImage({ ...image, file: e.target.files?.[0] || null })
-                        }
-                        className="h-10 w-full rounded-lg border border-gray-300 bg-white focus:ring-1 "
-                      />
-                      {/* Preview */}
-                      {image.file && (
-                        <Image
-                          src={URL.createObjectURL(image.file)}
-                          alt="Brand Preview"
-                          width={128}
-                          height={128}
-                          className="mt-2 h-32 w-auto rounded-lg border border-gray-300 object-cover"
-                        />
-                      )}
-                    </div>
-                  </div>
+            {imagePreview ? (
+              <div className="space-y-3">
+                {/* Image Preview */}
+                <div className="relative w-32 h-32 bg-gradient-to-br from-slate-100 to-slate-200 rounded-lg flex items-center justify-center border-2 border-slate-200 overflow-hidden">
+                  <Image
+                    src={imagePreview}
+                    alt="Brand preview"
+                    width={128}
+                    height={128}
+                    className="w-full h-full object-contain"
+                  />
                 </div>
 
-                {/* ---------------------------------Brand Icon  hidden---------------------------------------------- */}
-                <div className="bg-gray-50 w-full hidden  p-5 rounded-xl border border-gray-200">
-                  <h3 className="text-sm font-semibold text-gray-700 mb-4">Brand Icon (Optional)</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">
-                        Icon Name
-                      </label>
-                      <Input
-                        placeholder="Enter icon name"
-                        value={icon.name}
-                        onChange={(e) => setIcon({ ...icon, name: e.target.value })}
-                        className="h-10 rounded-lg border border-gray-300 bg-white focus:ring-1 focus:ring-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">
-                        Upload Icon
-                      </label>
-                      <Input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) =>
-                          setIcon({ ...icon, file: e.target.files?.[0] || null })
-                        }
-                        className="h-10 rounded-lg border border-gray-300 bg-white focus:ring-1 focus:ring-blue-500"
-                      />
-                      {/* Preview */}
-                      {icon.file && (
-                        <Image
-                          src={URL.createObjectURL(icon.file)}
-                          alt="Icon Preview"
-                          width={80}
-                          height={80}
-                          className="mt-2 h-20 w-20 rounded-lg border border-gray-300 object-cover"
-                        />
-                      )}
-                    </div>
-                  </div>
+                {/* Change/Remove Buttons */}
+                <div className="flex gap-2">
+                  <label className="flex-1">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                      disabled={isLoading}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full border-slate-200 hover:border-blue-300 hover:bg-blue-50"
+                      asChild
+                      disabled={isLoading}
+                    >
+                      <span className="cursor-pointer">
+                        <Upload className="w-4 h-4 mr-2" />
+                        Change Image
+                      </span>
+                    </Button>
+                  </label>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={handleRemoveImage}
+                    className="border-red-200 hover:border-red-300 hover:bg-red-50 text-red-600"
+                    disabled={isLoading}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
                 </div>
               </div>
+            ) : (
+              <label className="block">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                  disabled={isLoading}
+                />
+                <div className="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center hover:border-blue-400 hover:bg-blue-50 transition-colors cursor-pointer">
+                  <div className="flex flex-col items-center">
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center mb-3">
+                      <Upload className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <p className="text-sm font-semibold text-slate-900 mb-1">
+                      Click to upload image
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      PNG, JPG, GIF up to 10MB
+                    </p>
+                  </div>
+                </div>
+              </label>
+            )}
+          </div>
 
-              {/* Submit Button */}
-              <Button
-                className="w-full h-12 mt-4 bg-black hover:bg-zinc-700 text-white font-semibold rounded-lg"
-                onClick={handleSubmit}
-                disabled={isLoading}
-              >
-                {isLoading ? "Creating..." : "Create Brand"}
-              </Button>
-            </div>
-          </CardContent>
+          {/* Submit Button */}
+          <Button
+            onClick={handleSubmit}
+            disabled={isLoading || !name.trim() || !imageFile}
+            className="w-full h-11 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-lg transition-all"
+          >
+            {isLoading ? (
+              <>
+                <span className="inline-block animate-spin mr-2">⏳</span>
+                Creating Brand...
+              </>
+            ) : (
+              "Create Brand"
+            )}
+          </Button>
         </div>
-      </div>
-    </>
+      </CardContent>
+    </div>
   );
 };
 
