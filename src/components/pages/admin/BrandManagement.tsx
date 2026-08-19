@@ -17,7 +17,7 @@ import {
   Trash2,
   Edit2,
   Eye,
-  Box3,
+  Package,
   MoreVertical,
   Grid3X3,
   List,
@@ -98,7 +98,7 @@ const BrandManagement = () => {
               <div>
                 <h1 className="text-5xl font-bold text-white mb-2 flex items-center gap-3">
                   <div className="p-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg">
-                    <Box3 className="w-6 h-6 text-white" />
+                    <Package className="w-6 h-6 text-white" />
                   </div>
                   Brands
                 </h1>
@@ -201,7 +201,7 @@ const BrandManagement = () => {
                         />
                       ) : (
                         <div className="text-center">
-                          <Box3 className="w-12 h-12 text-slate-500 mx-auto" />
+                          <Package className="w-12 h-12 text-slate-500 mx-auto" />
                         </div>
                       )}
                       {/* Overlay Actions */}
@@ -263,7 +263,7 @@ const BrandManagement = () => {
                             sizes="64px"
                           />
                         ) : (
-                          <Box3 className="w-8 h-8 text-slate-500" />
+                          <Package className="w-8 h-8 text-slate-500" />
                         )}
                       </div>
                       <div className="min-w-0">
@@ -316,7 +316,7 @@ const BrandManagement = () => {
         ) : (
           <div className="text-center py-20">
             <div className="inline-flex items-center justify-center w-20 h-20 bg-slate-700/50 rounded-full mb-6">
-              <Box3 className="w-10 h-10 text-slate-500" />
+              <Package className="w-10 h-10 text-slate-500" />
             </div>
             <h3 className="text-2xl font-bold text-white mb-2">No Brands Found</h3>
             <p className="text-slate-400 mb-8">Get started by creating your first brand</p>
@@ -363,7 +363,7 @@ const BrandManagement = () => {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <Box3 className="w-16 h-16 text-slate-600" />
+                  <Package className="w-16 h-16 text-slate-600" />
                 )}
               </div>
               <div>

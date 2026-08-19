@@ -29,7 +29,8 @@ const BrandEditor: React.FC<BrandEditorProps> = ({ brandId, onClose }) => {
   useEffect(() => {
     if (brand) {
       setName(brand.name || "");
-      setImagePreview(brand.image || "");
+      const img = (brand as any)?.image || (brand?.images?.[0]?.image as string) || "";
+      setImagePreview(img);
       setImageFile(null);
     }
   }, [brand]);
@@ -56,8 +57,9 @@ const BrandEditor: React.FC<BrandEditorProps> = ({ brandId, onClose }) => {
 
   const handleRemoveImage = () => {
     setImageFile(null);
-    if (brand?.image) {
-      setImagePreview(brand.image);
+    const img = (brand as any)?.image || (brand?.images?.[0]?.image as string) || "";
+    if (img) {
+      setImagePreview(img);
     } else {
       setImagePreview("");
     }
