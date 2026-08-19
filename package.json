@@ -98,7 +98,7 @@
     "baseline-browser-mapping": "^2.11.15",
     "eslint": "^9",
     "eslint-config-next": "^16.1.6",
-    "next": "^16.0.6",
+    "next": "^16.1.6",
     "next-auth": "^4.24.11",
     "postcss": "^8.5.6",
     "react-hook-form": "^7.62.0",
