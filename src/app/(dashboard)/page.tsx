@@ -54,7 +54,7 @@ export default function DashboardPage() {
         </h1>
         <p className="text-gray-500 mb-6">
           You don’t have permission to access this page.  
-          Please log in with an admin or vendor account.
+          Please log in with an admin or seller account.
         </p>
         <button
           onClick={() => router.push("/auth/login")}

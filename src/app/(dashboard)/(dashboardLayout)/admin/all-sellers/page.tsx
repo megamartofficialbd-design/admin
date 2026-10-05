@@ -1,13 +1,12 @@
-import AllVendors from '@/components/pages/admin/AllVendors'
+import AllVendors from "@/components/pages/admin/AllVendors";
+
 export const metadata = {
   title: "All Sellers | Bekolpo",
   description: "View all sellers in the admin dashboard.",
 };
 
 const page = () => {
-  return (
-    <AllVendors />
-  )
-}
+  return <AllVendors />;
+};
 
-export default page
+export default page;

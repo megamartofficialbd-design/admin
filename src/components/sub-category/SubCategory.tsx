@@ -86,12 +86,12 @@ export default function SubCategory({
     }
   }, [editSubCategory, setValue])
 
-  // Get only main categories (not sub-categories) for parent selection
+  // Allow selecting parent category (support multi-level category hierarchy)
   const parentCategoryOptions: Option[] = (allCategories || [])
-    .filter((cat: any) => cat.isSubCategory !== true && cat._id)
+    .filter((cat: any) => cat._id && cat._id !== editSubCategory?._id)
     .map((cat: any) => ({
       value: cat._id,
-      label: cat.name,
+      label: cat.isSubCategory ? `↳ ${cat.name} (Sub-category)` : cat.name,
     }))
 
   const onSubmit = async (data: SubCategoryFormValues) => {

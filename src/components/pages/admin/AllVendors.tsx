@@ -75,13 +75,13 @@ export default function AllVendors() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <UserStatCard
-          title="Total Vendors"
+          title="Total Sellers"
           value={String(totalVendors)}
           subtitle="+12% from last month"
           icon={<StoreIcon className="h-6 w-6 text-pink-600" />}
         />
         <UserStatCard
-          title="Active Vendors"
+          title="Active Sellers"
           value={String(activeVendors)}
           subtitle="+5% from last month"
           icon={<UsersIcon className="h-6 w-6 text-green-600" />}
@@ -93,7 +93,7 @@ export default function AllVendors() {
           icon={<DollarSign className="h-6 w-6 text-blue-600" />}
         />
         <UserStatCardEvg
-          title="Avg Products/Vendor"
+          title="Avg Products/Seller"
           value={avgProducts.toFixed(0)}
           subtitle="-3 from last month"
           icon={<PackageIcon className="h-6 w-6 text-purple-600" />}
@@ -104,7 +104,7 @@ export default function AllVendors() {
         <div className="relative w-full sm:w-full">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search vendors..."
+            placeholder="Search sellers..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9 h-11 w-full"
@@ -165,12 +165,12 @@ export default function AllVendors() {
       <div className="border rounded-lg p-4 w-full bg-white dark:bg-background">
         <div className="overflow-x-auto">
           <h2 className="text-2xl font-bold text-[#1B1F32]">
-            Vendors ({totalVendors})
+            Sellers ({totalVendors})
           </h2>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-[#979797]">Vendor</TableHead>
+                <TableHead className="text-[#979797]">Seller</TableHead>
                 <TableHead className="text-[#979797]">Contact</TableHead>
                 <TableHead className="text-[#979797]">Status</TableHead>
                 <TableHead className="text-[#979797]">Joined Date</TableHead>
@@ -227,19 +227,21 @@ export default function AllVendors() {
                             refetch();
                           }
                         } catch (err) {
-                          console.error("Failed to update vendor status:", err);
+                          console.error("Failed to update seller status:", err);
                         }
                       }}
-                      className={`px-3 py-1 rounded-full text-xs font-medium cursor-pointer ${vendor.status === "Active"
+                      className={`px-3 py-1 rounded-full text-xs font-medium cursor-pointer ${
+                        vendor.status === "Active" || vendor.status === "approved"
                           ? "bg-[#C7FFD6] text-green-700"
-                          : vendor.status === "Pending"
+                          : vendor.status === "Pending" || vendor.status === "pending"
                             ? "bg-yellow-100 text-yellow-700"
                             : "bg-red-700 text-white"
-                        }`}
+                      }`}
                     >
                       <option value="Active">Active</option>
-                      <option value="Pending">Pending</option>
-                      <option value="Blocked">blocked</option>
+                      <option value="approved">Approved</option>
+                      <option value="pending">Pending</option>
+                      <option value="Blocked">Blocked</option>
                     </select>
                   </TableCell>
 

@@ -3,29 +3,29 @@ import { IVendor } from '@/types/vendor';
 
 const vendorApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    // Create a new vendor
+    // Create a new seller
     createVendor: builder.mutation<IVendor, Partial<IVendor>>({
       query: (data) => ({
-        url: '/vendor/create-vendor',
+        url: '/seller/create-seller',
         method: 'POST',
         body: data,
       }),
     }),
 
-    // Get all vendors
+    // Get all sellers
     getVendors: builder.query<IVendor[], void>({
       query: () => ({
-        url: '/vendor',
+        url: '/seller',
         method: 'GET',
       }),
       transformResponse: (response: { success: boolean; message: string; data: IVendor[] }) =>
         response.data,
     }),
 
-    // Get a single vendor by ID
+    // Get a single seller by ID
     getVendorById: builder.query<any , string>({
       query: (id) => ({
-        url: `/vendor/${id}`,
+        url: `/seller/${id}`,
         method: 'GET',
       }),
       transformResponse: (response: { success: boolean; message: string; data: IVendor }) =>
@@ -33,22 +33,21 @@ const vendorApi = baseApi.injectEndpoints({
     }),
     getVendorByUserId: builder.query<any , string>({
       query: (id) => ({
-        url: `/vendor/user/${id}`,
+        url: `/seller/user/${id}`,
         method: 'GET',
       }),
       transformResponse: (response: { success: boolean; message: string; data: IVendor }) =>
         response.data,
     }),
-      updateVendorStatus: builder.mutation<IVendor, { id: string; status: string }>({
+    updateVendorStatus: builder.mutation<IVendor, { id: string; status: string }>({
       query: ({ id, status }) => ({
-        url: `/vendor/status-update/${id}`,
+        url: `/seller/status-update/${id}`,
         method: 'PATCH',
         body: { status },
       }),
       transformResponse: (response: { success: boolean; message: string; data: IVendor }) =>
         response.data,
     }),
-    
   }),
 });
 
@@ -59,3 +58,11 @@ export const {
   useGetVendorByUserIdQuery,
   useUpdateVendorStatusMutation,
 } = vendorApi;
+
+// Seller aliases
+export const useCreateSellerMutation = useCreateVendorMutation;
+export const useGetSellersQuery = useGetVendorsQuery;
+export const useGetSellerByIdQuery = useGetVendorByIdQuery;
+export const useGetSellerByUserIdQuery = useGetVendorByUserIdQuery;
+export const useUpdateSellerStatusMutation = useUpdateVendorStatusMutation;
+export default vendorApi;

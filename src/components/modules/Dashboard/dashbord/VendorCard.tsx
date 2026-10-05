@@ -10,7 +10,7 @@ export default function VendorCard({ totalVendors, comparedTo }: VendorCardProps
     <div className="bg-[#C9C9C926] text-card-foreground rounded-xl p-4 md:p-6 shadow-sm w-full max-w-full h-[200px] aspect-[358/199] flex flex-col justify-between">
       {/* Title */}
       <div>
-        <h3 className="text-xl font-semibold">Total Vendors</h3>
+        <h3 className="text-xl font-semibold">Total Sellers</h3>
         <p className="text-sm font-semibold text-muted-foreground">{comparedTo}</p>
       </div>
 

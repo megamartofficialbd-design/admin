@@ -67,35 +67,35 @@ export default function VendorListPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-xl md:text-3xl font-bold">Vendor List</h1>
-          <p className="text-[#979797]">Manage your supplier relationships</p>
+          <h1 className="text-xl md:text-3xl font-bold">Seller List</h1>
+          <p className="text-[#979797]">Manage your seller and store relationships</p>
         </div>
 
         <Button className="bg-black text-white hover:bg-gray-800 h-9 text-sm rounded-md px-4">
           <Plus className="w-4 h-4 mr-2" />
-          Add New Vendor
+          Add New Seller
         </Button>
       </div>
 
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard title="Total Vendors" value={String(totalVendors)} icon={<Store className="text-purple-700 w-5 h-5" />} subtitle="Registered suppliers" />
-        <StatCard title="Active Vendors" value={String(activeVendors)} icon={<UserCheck className="text-green-500 w-5 h-5" />} subtitle="Currently supplying" />
-        <StatCard title="Total Products" value={String(totalProducts)} icon={<Package className="text-indigo-500 w-5 h-5" />} subtitle="Available from vendors" />
-        <StatCard title="Avg Rating" value={avgRating} icon={<Star className="text-yellow-500 w-5 h-5 fill-yellow-500" />} subtitle="Vendor performance" />
+        <StatCard title="Total Sellers" value={String(totalVendors)} icon={<Store className="text-purple-700 w-5 h-5" />} subtitle="Registered sellers" />
+        <StatCard title="Active Sellers" value={String(activeVendors)} icon={<UserCheck className="text-green-500 w-5 h-5" />} subtitle="Currently active" />
+        <StatCard title="Total Products" value={String(totalProducts)} icon={<Package className="text-indigo-500 w-5 h-5" />} subtitle="Available from sellers" />
+        <StatCard title="Avg Rating" value={avgRating} icon={<Star className="text-yellow-500 w-5 h-5 fill-yellow-500" />} subtitle="Seller performance" />
       </div>
 
-      {/* Vendor Directory */}
+      {/* Seller Directory */}
       <Card className="p-6 rounded-xl">
         <div className="mb-2">
-          <h2 className="text-2xl font-bold">Vendor Directory</h2>
-          <p className="text-sm text-muted-foreground mb-4">Complete list of all registered vendors and suppliers</p>
+          <h2 className="text-2xl font-bold">Seller Directory</h2>
+          <p className="text-sm text-muted-foreground mb-4">Complete list of all registered sellers and stores</p>
 
           <div className="flex items-center gap-2 mb-4">
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
-                placeholder="Search Vendors..."
+                placeholder="Search Sellers..."
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }} // Reset page on search
                 className="pl-9"

@@ -1,26 +1,36 @@
 import { baseApi } from "@/redux/api/baseApi";
 
-export interface Vendor {
-    _id: string;
-    name: string;
-    contactEmail: string;
-    phone:string;
-    status:string;
-    createdAt:string;
-    products:number;
-    sales:string;
+export interface Seller {
+  _id: string;
+  name: string;
+  contactEmail: string;
+  phone: string;
+  status: string;
+  createdAt: string;
+  products: number;
+  sales: string;
 }
 
-const vendorApi = baseApi.injectEndpoints({
-  endpoints: builder => ({
-    getAllVendors: builder.query<Vendor[], void>({
+export type Vendor = Seller;
+
+const sellerApi = baseApi.injectEndpoints({
+  endpoints: (builder) => ({
+    getAllSellers: builder.query<Seller[], void>({
       query: () => ({
-        url: '/vendor',
+        url: '/seller',
         method: 'GET',
       }),
-      transformResponse: (response: { data: Vendor[] }) => response.data,
+      transformResponse: (response: { data: Seller[] }) => response.data,
+    }),
+    getAllVendors: builder.query<Seller[], void>({
+      query: () => ({
+        url: '/seller',
+        method: 'GET',
+      }),
+      transformResponse: (response: { data: Seller[] }) => response.data,
     }),
   }),
 });
 
-export const { useGetAllVendorsQuery } = vendorApi;
+export const { useGetAllSellersQuery, useGetAllVendorsQuery } = sellerApi;
+export default sellerApi;

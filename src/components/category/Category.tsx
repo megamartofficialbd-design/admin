@@ -106,13 +106,13 @@ export default function Category({
   const { data: categoriesData, isLoading: isCategoriesLoading } =
     useGetAllCategoriesQuery(undefined);
 
-  // Filter to show only parent categories (not sub-categories) for assignment
+  // Allow selecting parent category (shows hierarchy in options)
   const parentCategoryOptions: Option[] =
     categoriesData
-      ?.filter((cat: any) => cat.isSubCategory !== true && cat._id !== editCategory?._id)
+      ?.filter((cat: any) => cat._id !== editCategory?._id)
       ?.map((cat: any) => ({
         value: cat._id,
-        label: cat.name,
+        label: cat.isSubCategory ? `↳ ${cat.name} (Sub-category)` : cat.name,
       })) ?? [];
 
   const onSubmit = async (data: CategoryFormValues) => {

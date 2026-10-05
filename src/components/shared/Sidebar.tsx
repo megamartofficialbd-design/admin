@@ -35,6 +35,7 @@ import {
   Box,
   UsbIcon,
   Check,
+  Clock,
   LucideIcon,
 } from "lucide-react";
 import { MdPayment, MdSettings } from "react-icons/md";
@@ -196,7 +197,8 @@ export function AppSidebar({
         { icon: HelpCircle, label: "System FAQ", href: "/admin/faqs" },
       ],
       vendorItems: [
-        { icon: Store, label: "Vendors", href: "/admin/all-vendors" },
+        { icon: Store, label: "All Sellers", href: "/admin/all-vendors" },
+        { icon: Clock, label: "Pending Sellers", href: "/admin/pending-vendors" },
         { icon: User, label: "Customers", href: "/admin/customers" },
       ],
       ecommerceManagement: [
@@ -595,7 +597,7 @@ const { data: settings } = useGetSettingsQuery();
                 <div className="ml-[6px]">
                   {renderCollapsible(
                     Store,
-                    "Vendors",
+                    "Sellers",
                     navigationItems.vendorItems,
                     "vendorItems",
                   )}

@@ -46,9 +46,12 @@ export interface IVendor {
   summery?: Summery;
   orderStatus?: OrderStatus;
   status: string;
+  onboarding?: any;
   salesHistory: any[];
   topCategoryByProducts: any[];
   createdAt: string;
   updatedAt: string;
   __v: number;
 }
+
+export type ISeller = IVendor;
